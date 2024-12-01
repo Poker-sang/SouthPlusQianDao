@@ -41,7 +41,7 @@ web = webdriver.Chrome(service=service, options=chrome_options)
 def Lingqu():
     try:
         # 切换到进行中的任务
-        web.find_element(By.XPATH, '//*[@id="main"]/table/tbody/tr/td[1]/div[2]/table/tbody/tr[3]/td').click()
+        web.find_element(By.XPATH, '//*[@id="main"]/table/tbody/tr/td[1]/div[2]/table/tbody/tr[3]/td/a').click()
         # 点击进行中的任务
         # 完成日常
         time.sleep(2)
@@ -109,7 +109,7 @@ def Lingqu():
 
 
 
-url = 'https://www.south-plus.net/plugin.php?H_name-tasks.html.html'
+url = 'https://www.south-plus.net/plugin.php?H_name-tasks.html'
 web.get(url)
 
 time.sleep(1)
