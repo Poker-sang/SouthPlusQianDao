@@ -5,7 +5,7 @@
 - 运行 Action 即可。
 - cookies的获取
   ![图片](https://github.com/user-attachments/assets/2c010da4-0078-4426-8084-ffd7c7540876)
-
+- ### Todo: 使用CF API绕过机器人检测
 ```
 ### 本地构建要求
 
