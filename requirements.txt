@@ -1,6 +1,4 @@
 requests
-beautifulsoup4
-selenium
 sys
 re
 logging
