@@ -1,161 +1,99 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-import json
-from bs4 import BeautifulSoup
+import sys
+import re
 import requests
-import time
-import os
+import logging
 
-# 获取系统变量serverKey
-serverKey = os.environ.get('serverKey')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
 
+URL = 'https://www.south-plus.net/plugin.php'
 
-# 获取 COOKIE 环境变量
-cookie_json = os.environ.get('COOKIE')
+#SOUTHPLUS_COOKIE
+cookies = os.environ.get('COOKIE')
+def get_info(s):
+    res = re.findall(r'(?<=CDATA).*(?=\])', s)
 
-# 获取 COOKIE 环境变量并解析为 JSON 列表
+    return res[0] if len(res) >= 1 else s
 
+headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    "cookie": cookies,
+}
+session = requests.session()
+session.headers = headers
 
-if cookie_json:
-    try:
-        # 解析 JSON 字符串
-        cookie_data = json.loads(cookie_json)
-    except json.JSONDecodeError:
-        print("错误：无法解析 COOKIE 环境变量为 JSON。")
-else:
-    print("错误：COOKIE 环境变量未设置。")
-
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # 如果你在无头模式下运行
-chrome_options.add_argument("--no-sandbox")  # 解决一些权限问题
-chrome_options.add_argument("--disable-dev-shm-usage")  # 解决共享内存问题
-
-
-service = Service(rf'/usr/local/bin/chromedriver')  # 确保路径正确
-web = webdriver.Chrome(service=service, options=chrome_options)
-
-def Lingqu():
-    try:
-        # 切换到进行中的任务
-        web.find_element(By.XPATH, '//*[@id="main"]/table/tbody/tr/td[1]/div[2]/table/tbody/tr[3]/td/a').click()
-        # 点击进行中的任务
-        # 完成日常
-        time.sleep(2)
-        try:
-            web.find_element(By.XPATH, '//*[@id="both_15"]/a/img').click()
-            print('日常领取成功')
-            # 用urlencode编码中文内容
-            messagecontent = '日常领取成功'
-            messagecontent = requests.utils.quote(messagecontent)
-            # 通过server酱发送通知
-            url = f"https://sctapi.ftqq.com/{serverKey}.send?title={messagecontent}&desp=messagecontent"
-
-            payload={}
-            headers = {
-            'User-Agent': 'Apifox/1.0.0 (https://apifox.com)'
-            }
-
-            response = requests.request("GET", url, headers=headers, data=payload)
-        except:
-            print('日常领取失败')
-            
-            
-        try:
-            # 尝试点击周常,没有就跳了
-            web.find_element(By.XPATH, '//*[@id="both_14"]/a/img').click()
-            print('周常领取成功')
-            # 用urlencode编码中文内容
-            messagecontent = '周常领取成功'
-            messagecontent = requests.utils.quote(messagecontent)
-            # 通过server酱发送通知
-            url = f"https://sctapi.ftqq.com/{serverKey}.send?title={messagecontent}&desp=messagecontent"
-
-            payload={}
-            headers = {
-            'User-Agent': 'Apifox/1.0.0 (https://apifox.com)'
-            }
-
-            response = requests.request("GET", url, headers=headers, data=payload)
-
-        except:
-            pass
+# 日常任务
+# 领取任务
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job',
+    'cid': '15',
+    'nowtime': '1672151938011',
+    'verify': 'f2807318',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
+# 完成任务
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job2',
+    'cid': '15',
+    'nowtime': '1672152113906',
+    'verify': 'f2807318',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
 
 
-    except:
-        # 用urlencode编码中文内容
-        messagecontent = '日常领取失败'
-        messagecontent = requests.utils.quote(messagecontent)
-
-        # 通过server酱发送通知
-        url = f"https://sctapi.ftqq.com/{serverKey}.send?title={messagecontent}&desp=messagecontent"
-
-        payload={}
-        headers = {
-        'User-Agent': 'Apifox/1.0.0 (https://apifox.com)'
-        }
-
-        response = requests.request("GET", url, headers=headers, data=payload)
-
-        print('日常暂未刷新或领取失败')
-
-
-
-
-
-
-
-
-url = 'https://www.south-plus.net/plugin.php?H_name-tasks.html'
-web.get(url)
-
-time.sleep(1)
-# # 保存cookies为json格式
-# cookies = web.get_cookies()
-# print(cookies)
-# with open('cookies.json', 'w') as f:
-#     json.dump(cookies, f)
+# 周常任务
+# 领取任务
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job',
+    'cid': '14',
+    'nowtime': '1673581486261',
+    'verify': '42cb3e60',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
+# 完成任务
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job2',
+    'cid': '14',
+    'nowtime': '1673581486561',
+    'verify': '42cb3e60',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
 
 
-# 将cookies添加到webdriver中   
-for cookie in cookie_data:
-    web.add_cookie(cookie)
-
-# 重新加载页面
-web.get(url)
-time.sleep(3)
-# 领取周常
-soup = BeautifulSoup(web.page_source, 'html.parser')
-weekly_task_1 = soup.find('span', id='p_15')
-weekly_task_2 = soup.find('span', id='p_14')
-print(weekly_task_1,weekly_task_2)
-
-
-if weekly_task_1 and weekly_task_2:
-    web.find_element(By.XPATH, '//*[@id="p_14"]/a/img').click()
-    web.find_element(By.XPATH, '//*[@id="p_15"]/a/img').click()
-    print('任务已领取')
-    Lingqu()  
-
-elif weekly_task_1:
-    web.find_element(By.XPATH, '//*[@id="p_15"]/a/img').click()
-    Lingqu()
-
-elif weekly_task_2:
-    web.find_element(By.XPATH, '//*[@id="p_14"]/a/img').click()
-    Lingqu()
-
-
-    
-else:
-    print('任务暂未刷新')
-
-
-
-
-
-
-web.quit()
+# 新年红包
+# 领取任务
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job',
+    'cid': '19',
+    'nowtime': '1672570369699',
+    'verify': 'f2807318',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
+# 领取奖励
+params = {
+    'H_name': 'tasks',
+    'action': 'ajax',
+    'actions': 'job2',
+    'cid': '19',
+    'nowtime': '1672570470977',
+    'verify': 'f2807318',
+}
+response = session.get(URL, params=params)
+logger.info(get_info(response.text))
