@@ -1,33 +1,11 @@
-## 修改于：[Joshua-auhsoj/SouthPlusQianDaoOrginal](https://github.com/Joshua-auhsoj/SouthPlusQianDaoOrginal)
+## 修改于： [KuriYama-mirai524/SouthPlusQianDao_WebDriver](https://github.com/KuriYama-mirai524/SouthPlusQianDao_WebDriver)
 
-- 将 API 获取改成了简单、粗暴、无脑的 WebDriver。
-- 在 **Settings** 中设置好 **COOKIE**（需要 JSON 格式的 cookie）和 **serverKey**（server 酱，如果不知道可以谷歌一下）。
+- 将 API 获取改回了简单、粗暴、无脑的 requests。
+- 在 **Settings** 中设置好 **COOKIE**（需要 Chrome 格式）。
 - 运行 Action 即可。
-- cookies的格式(按这个格式创建COOKIE变量的值)：
-```
-[
+- cookies的获取
+  ![图片](https://github.com/user-attachments/assets/2c010da4-0078-4426-8084-ffd7c7540876)
 
-    {
-        "domain": "www.south-plus.net",
-        "expiry": 填写对应的时间戳,
-        "httpOnly": true,
-        "name": "eb9e6_winduser",
-        "path": "/",
-        "sameSite": "Lax",
-        "secure": false,
-        "value": "填写自己账号的值"
-    },
-    {
-        "domain": "www.south-plus.net",
-        "expiry": 填写对应的时间戳,
-        "httpOnly": true,
-        "name": "eb9e6_cknum",
-        "path": "/",
-        "sameSite": "Lax",
-        "secure": false,
-        "value": "填写自己账号的值"
-    }
-]
 ```
 ### 本地构建要求
 
