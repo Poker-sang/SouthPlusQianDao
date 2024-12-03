@@ -36,6 +36,12 @@ jobs:
         chmod +x chromedriver
         sudo mv chromedriver /usr/local/bin/
 
+    - name: Bypass Cloudflare for Github Action
+      uses: xiaotianxt/bypass-cloudflare-for-github-action@v1.1.1
+      with:
+          cf_zone_id: ${{ secrets.CF_ZONE_ID }}
+          cf_api_token: ${{ secrets.CF_API_TOKEN }}
+    
     - name: 总脚本
       env:
         COOKIE: ${{ secrets.COOKIE }}
