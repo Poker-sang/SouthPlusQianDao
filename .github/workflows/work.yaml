@@ -2,48 +2,60 @@ name: SouthPlus签到
 
 on:
   schedule:
-    - cron: "0 17 * * *"
+    - cron: "0 0/18 * * *"
   workflow_dispatch:
 
 jobs:
   run-script:
-    runs-on: ubuntu-latest
-    
+    runs-on: windows-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
-    
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+      - name: Run PowerShell Script
+        id: run-script
+        shell: pwsh
+        env:
+          MYPWD: ${{ secrets.PWD }}
+          COOKIE: ${{ secrets.COOKIE }}
+          UA: ${{ secrets.UA }}
+        continue-on-error: true
+        run: |
+          $myPwd = $env:MYPWD
+          $cookie = $env:COOKIE
+          $ua = $env:UA
+          $result = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
+          if (-not $result) { exit 1 }
 
-    - name: Install Chrome
-      run: |
-        CHROME_VERSION=103.0.5060.53
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f
-        sudo apt-get install -y google-chrome-stable
+      - name: Retry with Exponential Backoff
+        if: steps.run-script.outcome
+        shell: pwsh
+        env:
+          MYPWD: ${{ secrets.PWD }}
+          COOKIE: ${{ secrets.COOKIE }}
+          UA: ${{ secrets.UA }}
+        run: |
+          $maxRetries = 10
+          $retryCount = 0
+          $delay = 180 # 初始延迟时间（3分钟）
+          $totalRetryTime = 0
+          $maxRetryTime = 3 * 3600 # 最大重试时间（3小时）
 
-    - name: Install ChromeDriver
-      run: |
-        wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.91/linux64/chromedriver-linux64.zip
-        unzip chromedriver-linux64.zip
-        cd chromedriver-linux64
-        chmod +x chromedriver
-        sudo mv chromedriver /usr/local/bin/
+          while ($retryCount -lt $maxRetries -and $totalRetryTime -lt $maxRetryTime) {
+            Write-Output "重试第 $($retryCount + 1) 次"
+            Start-Sleep -Seconds $delay
+            $myPwd = $env:MYPWD
+            $cookie = $env:COOKIE
+            $ua = $env:UA
+            $success = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
+            if ($success) {
+              Write-Output "脚本在重试第 $($retryCount + 1) 次成功"
+              exit 0
+            }
+            $retryCount++
+            $totalRetryTime += $delay
+            $delay = [math]::Min($delay * 2, $maxRetryTime - $totalRetryTime)
+          }
 
-    - name: Bypass Cloudflare for Github Action
-      uses: xiaotianxt/bypass-cloudflare-for-github-action@v1.1.1
-      with:
-          cf_zone_id: ${{ secrets.CF_ZONE_ID }}
-          cf_api_token: ${{ secrets.CF_API_TOKEN }}
-    
-    - name: 总脚本
-      env:
-        COOKIE: ${{ secrets.COOKIE }}
-        serverKey: ${{ secrets.serverKey }}
-      run: python byWebdrvier.py
+          Write-Output "脚本在 $retryCount 次重试后失败"
+          exit 1
