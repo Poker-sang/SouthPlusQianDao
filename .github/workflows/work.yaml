@@ -24,8 +24,8 @@ jobs:
           $myPwd = $env:MYPWD
           $cookie = $env:COOKIE
           $ua = $env:UA
-          $result = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
-          if (-not $result) { exit 1 }
+          $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
+          if ($failed) { exit 1 }
 
       - name: Retry with Exponential Backoff
         if: steps.run-script.outcome
@@ -47,8 +47,8 @@ jobs:
             $myPwd = $env:MYPWD
             $cookie = $env:COOKIE
             $ua = $env:UA
-            $success = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
-            if ($success) {
+            $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
+            if (-not $failed) {
               Write-Output "脚本在重试第 $($retryCount + 1) 次成功"
               exit 0
             }

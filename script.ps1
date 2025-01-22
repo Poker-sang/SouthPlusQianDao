@@ -13,11 +13,11 @@ try {
 
     # 检查状态码
     if ($response.StatusCode -eq 202) {
-        Write-Output $false
-    } else {
         Write-Output $true
+    } else {
+        Write-Output $false
     }
 } catch {
-    # 捕获异常并返回false
-    Write-Output $false
+    # 捕获异常并返回true
+    Write-Output $true
 }
