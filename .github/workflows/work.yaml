@@ -2,7 +2,7 @@ name: SouthPlus签到
 
 on:
   schedule:
-    - cron: "0 0/18 * * *"
+    - cron: "0 */18 * * *"
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,8 @@ jobs:
           $myPwd = $env:MYPWD
           $cookie = $env:COOKIE
           $ua = $env:UA
+          $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
+          Write-Output "$beijingTime"
           $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
           if ($failed) { exit 1 }
 
@@ -42,7 +44,8 @@ jobs:
           $maxRetryTime = 3 * 3600 # 最大重试时间（3小时）
 
           while ($retryCount -lt $maxRetries -and $totalRetryTime -lt $maxRetryTime) {
-            Write-Output "重试第 $($retryCount + 1) 次"
+            $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
+            Write-Output "$beijingTime: 重试第 $($retryCount + 1) 次"
             Start-Sleep -Seconds $delay
             $myPwd = $env:MYPWD
             $cookie = $env:COOKIE
