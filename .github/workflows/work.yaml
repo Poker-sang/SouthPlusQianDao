@@ -45,7 +45,7 @@ jobs:
 
           while ($retryCount -lt $maxRetries -and $totalRetryTime -lt $maxRetryTime) {
             $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
-            Write-Output "$beijingTime: 重试第 $($retryCount + 1) 次"
+            Write-Output "$beijingTime : 重试第 $($retryCount + 1) 次"
             Start-Sleep -Seconds $delay
             $myPwd = $env:MYPWD
             $cookie = $env:COOKIE
