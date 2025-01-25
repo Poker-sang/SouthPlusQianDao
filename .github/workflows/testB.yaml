@@ -1,0 +1,17 @@
+name: 测试1.5
+
+on:
+  schedule:
+    - cron: "*/30 */1 * * *"
+  workflow_dispatch:
+
+jobs:
+  test-b:
+    runs-on: windows-latest
+    steps:
+      - name: Run PowerShell Script
+        id: run-script
+        shell: pwsh
+        run: |
+          $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
+          Write-Output "$beijingTime"
