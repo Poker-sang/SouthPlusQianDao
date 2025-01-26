@@ -2,7 +2,7 @@ name: SouthPlus签到
 
 on:
   schedule:
-    - cron: "0 */18 * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,6 @@ jobs:
           MYPWD: ${{ secrets.PWD }}
           COOKIE: ${{ secrets.COOKIE }}
           UA: ${{ secrets.UA }}
-        continue-on-error: true
         run: |
           $myPwd = $env:MYPWD
           $cookie = $env:COOKIE
@@ -27,38 +26,6 @@ jobs:
           $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
           Write-Output "$beijingTime"
           $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
-          if ($failed) { exit 1 }
-
-      - name: Retry with Exponential Backoff
-        if: steps.run-script.outcome
-        shell: pwsh
-        env:
-          MYPWD: ${{ secrets.PWD }}
-          COOKIE: ${{ secrets.COOKIE }}
-          UA: ${{ secrets.UA }}
-        run: |
-          $maxRetries = 10
-          $retryCount = 0
-          $delay = 180 # 初始延迟时间（3分钟）
-          $totalRetryTime = 0
-          $maxRetryTime = 3 * 3600 # 最大重试时间（3小时）
-
-          while ($retryCount -lt $maxRetries -and $totalRetryTime -lt $maxRetryTime) {
-            $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
-            Write-Output "$beijingTime : 重试第 $($retryCount + 1) 次"
-            Start-Sleep -Seconds $delay
-            $myPwd = $env:MYPWD
-            $cookie = $env:COOKIE
-            $ua = $env:UA
-            $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
-            if (-not $failed) {
-              Write-Output "脚本在重试第 $($retryCount + 1) 次成功"
-              exit 0
-            }
-            $retryCount++
-            $totalRetryTime += $delay
-            $delay = [math]::Min($delay * 2, $maxRetryTime - $totalRetryTime)
+          if ($failed) {
+            exit 1
           }
-
-          Write-Output "脚本在 $retryCount 次重试后失败"
-          exit 1
