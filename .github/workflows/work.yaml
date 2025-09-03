@@ -34,7 +34,7 @@ jobs:
               $response = Invoke-WebRequest -Uri $url -Method Get
           
               Write-Output $response.Content
-              
+              Write-Output  $response.StatusCode
               # 检查状态码
               if ($response.StatusCode -ne 202) {
                   exit 1
