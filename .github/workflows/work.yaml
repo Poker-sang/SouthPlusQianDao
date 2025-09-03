@@ -33,13 +33,13 @@ jobs:
               # 发送GET请求
               $response = Invoke-WebRequest -Uri $url -Method Get
           
+              Write-Output $response.StatusCode
               Write-Output $response.Content
-              Write-Output  $response.StatusCode
+              
               # 检查状态码
-              if ($response.StatusCode -ne 202) {
+              if ($response.StatusCode -notin 200,202) {
                   exit 1
               }
           } catch {
-              # 捕获异常并返回true
-              Write-Output $true
+              # 捕获异常并忽略
           }
