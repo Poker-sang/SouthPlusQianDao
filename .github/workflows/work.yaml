@@ -25,7 +25,21 @@ jobs:
           $ua = $env:UA
           $beijingTime = [DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(8)).ToString("yyyy-MM-dd HH:mm:ss")
           Write-Output "$beijingTime"
-          $failed = .\script.ps1 -myPwd $myPwd -cookie $cookie -ua $ua
-          if ($failed) {
-            exit 1
+          
+          # 构建URL
+          $url = "https://south-plus.poker-sang.workers.dev/?pwd=$myPwd&cookie=$cookie&ua=$ua"
+          
+          try {
+              # 发送GET请求
+              $response = Invoke-WebRequest -Uri $url -Method Get
+          
+              Write-Output $response.Content
+              
+              # 检查状态码
+              if ($response.StatusCode -ne 202) {
+                  exit 1
+              }
+          } catch {
+              # 捕获异常并返回true
+              Write-Output $true
           }
